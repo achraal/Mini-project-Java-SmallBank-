@@ -1,0 +1,66 @@
+@startuml
+actor Utilisateur
+
+participant "ApplicationBanque" as app
+participant "Banque" as banque
+participant "Compte débiteur" as debiteur
+participant "Compte créditeur" as crediteur
+
+Utilisateur -> app : demanderVirement(numDebiteur, numCrediteur, montant)
+activate app
+
+app -> banque : virement(numDebiteur, numCrediteur, montant)
+activate banque
+
+banque -> banque : validerNumComptes(numDebiteur, numCrediteur)
+alt numéros invalides
+    banque --> app : throw CompteIntrouvableException
+    deactivate banque
+    app --> Utilisateur : afficherErreur("Compte introuvable")
+    deactivate app
+    return
+end
+
+banque -> banque : vérifierMontant(montant)
+alt montant <= 0
+    banque --> app : throw Exception("Montant invalide")
+    deactivate banque
+    app --> Utilisateur : afficherErreur("Montant invalide")
+    deactivate app
+    return
+end
+
+banque -> banque : rechercherCompte(numDebiteur)
+activate debiteur
+banque <-- debiteur : compte trouvé
+deactivate debiteur
+
+banque -> banque : rechercherCompte(numCrediteur)
+activate crediteur
+banque <-- crediteur : compte trouvé
+deactivate crediteur
+
+banque -> debiteur : debiter(montant)
+alt solde insuffisant
+    debiteur --> banque : throw SoldeInsuffisantException
+    banque --> app : throw SoldeInsuffisantException
+    deactivate banque
+    app --> Utilisateur : afficherErreur("Solde insuffisant")
+    deactivate app
+    return
+else
+    debiteur --> banque : confirmation débit
+end
+
+banque -> crediteur : crediter(montant)
+crediteur --> banque : confirmation crédit
+
+banque -> debiteur : ajouterOperation(Operation(VIREMENT, montant, "Virement vers compte " + numCrediteur))
+banque -> crediteur : ajouterOperation(Operation(VIREMENT, montant, "Virement reçu du compte " + numDebiteur))
+
+banque --> app : confirmation virement réussi
+deactivate banque
+
+app --> Utilisateur : afficherMessage("Virement effectué avec succès")
+deactivate app
+@enduml

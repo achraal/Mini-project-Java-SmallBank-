@@ -1,0 +1,109 @@
+@startuml
+
+' Déclaration des interfaces
+interface banque.interfaces.OperationsBancaires {
+    + crediter(montant: double)
+    + debiter(montant: double) throws Exception
+}
+
+' Exceptions
+class banque.exceptions.SoldeInsuffisantException {
+    + SoldeInsuffisantException(message: String)
+}
+
+class banque.exceptions.CompteIntrouvableException {
+    + CompteIntrouvableException(message: String)
+}
+
+' Enum TypeCompte
+enum banque.model.TypeCompte {
+    COURANT
+    EPARGNE
+}
+
+class banque.model.Operation {
+    - type: TypeOperation
+    - montant: double
+    - date: LocalDateTime
+    - details: String
+    + Operation(type: TypeOperation, montant: double, details: String)
+    + toString(): String
+}
+
+enum banque.model.TypeOperation {
+    CREDIT
+    DEBIT
+    VIREMENT
+}
+
+' Classe abstraite Compte
+abstract class banque.model.Compte {
+    - numero: int
+    - nomTitulaire: String
+    - prenomTitulaire: String
+    # solde: double
+    # historiqueOperations: ArrayList~Operation~
+    + Compte(numero: int, nom: String, prenom: String, soldeInitial: double)
+    + getNumero(): int
+    + getSolde(): double
+    + getTitulaire(): String
+    + crediter(montant: double)
+    + debiter(montant: double) throws Exception
+    + afficherHistorique()
+    + toString(): String
+    + ajouterOperation(op: Operation): void
+
+}
+
+' Classes filles
+class banque.model.CompteCourant {
+    - decouvertAutorise: double
+    + CompteCourant(numero: int, nom: String, prenom: String, soldeInitial: double, decouvert: double)
+    + debiter(montant: double) throws banque.exceptions.SoldeInsuffisantException
+    + toString(): String
+}
+
+class banque.model.CompteEpargne {
+    - tauxInteret: double
+    + CompteEpargne(numero: int, nom: String, prenom: String, soldeInitial: double, taux: double)
+    + debiter(montant: double) throws banque.exceptions.SoldeInsuffisantException
+    + appliquerInteret()
+    + toString(): String
+}
+
+' Classe Banque
+class banque.service.Banque {
+    - comptes: HashMap~Integer, Compte~
+    - numerosComptes: HashSet~Integer~
+    + ajouterCompte(compte: Compte) throws Exception
+    + rechercherCompte(numero: int): Compte throws banque.exceptions.CompteIntrouvableException
+    + virement(numDebiteur: int, numCrediteur: int, montant: double) throws Exception
+    + afficherComptes()
+}
+
+' Classe principale
+class app.ApplicationBanque {
+    + main(args: String[])
+}
+
+' Relations
+banque.model.Compte <|-- banque.model.CompteCourant
+banque.model.Compte <|-- banque.model.CompteEpargne
+
+banque.interfaces.OperationsBancaires <|.. banque.model.Compte
+
+banque.service.Banque "1" *-- "0..*" banque.model.Compte : comptes
+
+banque.model.Compte "1" *-- "0..*" banque.model.Operation : historiqueOperations
+
+banque.exceptions.SoldeInsuffisantException ..> banque.model.CompteCourant : throw
+banque.exceptions.SoldeInsuffisantException ..> banque.model.CompteEpargne : throw
+banque.exceptions.CompteIntrouvableException ..> banque.service.Banque : throw
+
+app.ApplicationBanque ..> banque.service.Banque
+app.ApplicationBanque ..> banque.model.CompteCourant
+app.ApplicationBanque ..> banque.model.CompteEpargne
+app.ApplicationBanque ..> banque.exceptions.SoldeInsuffisantException
+app.ApplicationBanque ..> banque.exceptions.CompteIntrouvableException
+
+@enduml

@@ -1,0 +1,24 @@
+@startuml
+left to right direction
+
+actor "Utilisateur" as User
+
+rectangle "Système Bancaire" {
+    usecase "Ajouter un compte" as UC_AjouterCompte
+    usecase "Afficher les comptes" as UC_AfficherComptes
+    usecase "Faire un virement" as UC_Virement
+    usecase "Afficher historique d'un compte" as UC_Historique
+    usecase "Consulter solde" as UC_ConsulterSolde
+    usecase "Crediter un compte" as UC_Crediter
+    usecase "Debiter un compte" as UC_Debiter
+}
+
+User --> UC_AjouterCompte
+User --> UC_AfficherComptes
+User --> UC_Virement
+User --> UC_Historique
+User --> UC_ConsulterSolde
+User --> UC_Crediter
+User --> UC_Debiter
+
+@enduml

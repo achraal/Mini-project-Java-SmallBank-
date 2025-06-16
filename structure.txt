@@ -1,0 +1,16 @@
+src/
+ └─ banque/
+     ├─ exceptions/
+     │    ├─ CompteIntrouvableException.java
+     │    └─ SoldeInsuffisantException.java
+     ├─ interfaces/
+     │    └─ OperationsBancaires.java
+     ├─ model/
+     │    ├─ Compte.java
+     │    ├─ CompteCourant.java
+     │    ├─ CompteEpargne.java
+     │    └─ TypeCompte.java
+     └─ service/
+          └─ Banque.java
+ └─ app/
+     └─ ApplicationBanque.java
